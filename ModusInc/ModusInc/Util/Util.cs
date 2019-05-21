@@ -7,12 +7,13 @@ using System.IO;
 using System.Data;
 using System.Xml.Serialization;
 using System.Xml;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace ModusInc.Util
 {
-    public class Util
-    {
-        public Util() { }
+    public static class Util
+    {        
 
         public static string ConvertDatatableToXML(DataTable dt, int iteration)
         {
@@ -22,61 +23,26 @@ namespace ModusInc.Util
             StreamReader sr = new StreamReader(str);
             string xmlstr;
             xmlstr = sr.ReadToEnd();
-            return GetXmlNodeListByName(xmlstr,iteration);
+            return GetXmlNodeListByName(xmlstr, iteration);
         }
 
-        public static T Deserialize2<T>(string filePath)
-        {
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(T));
-                T serializedData;
-                using (Stream stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    serializedData = (T)serializer.Deserialize(stream);
-                }
-                return serializedData;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public static T Deserialize<T>(string xmlString)
-        {
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(T), new XmlRootAttribute("data_x0024_"));
-                T serializedData;
-                StringReader stringReader = new StringReader(xmlString);
-                serializedData = (T)serializer.Deserialize(stringReader);
-                return serializedData;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public static T DeserializeXMLFileToObject<T>(string XmlFilename)
+        public static T DeserializeXMLToObject<T>(string XmlFilename)
         {
             T returnObject = default(T);
             if (string.IsNullOrEmpty(XmlFilename)) return default(T);
 
             try
             {
-                StreamReader xmlStream = new StreamReader(XmlFilename);
+                StringReader stringReader = new StringReader(XmlFilename);
                 XmlSerializer serializer = new XmlSerializer(typeof(T));
-                returnObject = (T)serializer.Deserialize(xmlStream);
+                returnObject = (T)serializer.Deserialize(stringReader);
             }
             catch (Exception ex)
             {
-
+                ex.ToString();
             }
             return returnObject;
         }
-
 
         public static string GetXmlNodeListByName(string xmlString, int iteration)
         {
@@ -88,11 +54,24 @@ namespace ModusInc.Util
             {
                 if (i == iteration)
                 {
-                    xmlNodeIteration = nodes[i].InnerXml;
+                    xmlNodeIteration = nodes[i].OuterXml;
+                    xmlNodeIteration = xmlNodeIteration.Replace("data_x0024_", "InputData");
                     return xmlNodeIteration;
                 }
             }
             return xmlNodeIteration;
         }
+
+        public static IWebDriver Login()
+        {
+            IWebDriver browser = new ChromeDriver();
+            browser.Navigate().GoToUrl("https://budget.modus.app/budget");
+            return browser;
+        }
+
+        public static void GenerateReport() {
+            //TODO - TRX research again about this report generation
+        }
+
     }
 }

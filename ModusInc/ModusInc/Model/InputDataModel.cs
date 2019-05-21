@@ -7,12 +7,13 @@ using System.Xml.Serialization;
 
 namespace ModusInc.Model
 {
-    [XmlRoot("data_x0024_")]
+    [XmlRoot("InputData")]
     public class InputDataModel
-    {
-        public string Name{ get; set; }
+    {       
         public string Category { get; set; }
         public string Description { get; set; }
-        public string Amount { get; set; }          
+        public string Amount { get; set; }
+        BudgetModel composeBudget { get; set; }
+        public InputDataModel() { }
     }
 }
