@@ -21,6 +21,8 @@ namespace ModusInc.TestClass
         public InputDataModel TestData { get; set; }
         public TestResult TestResult { get; set; }
 
+        public PageObjectBudget Budget { get; set; }
+
         public EndTwoEnd()
         {
             //
@@ -60,45 +62,46 @@ namespace ModusInc.TestClass
         //
         // Use ClassCleanup to run code after all tests in a class have run
         [ClassCleanup()]
-        public static void MyClassCleanup() { }
+        public static void MyClassCleanup()
+        {
+            Browser.Close();
+        }
         //
         // Use TestInitialize to run code before running each test 
         [TestInitialize()]
         public void MyTestInitialize()
-        {
-            //mstest /testcontainer:[path of test dll file] /resultfile:testResults.trx
+        {          
             TestResult = new TestResult();
             DataTable myTable = TestContext.DataRow.Table;
             string xml = Util.Util.ConvertDatatableToXML(myTable, TestContext.DataRow.Table.Rows.IndexOf(TestContext.DataRow));
-            TestData = Util.Util.DeserializeXMLToObject<InputDataModel>(xml);
-
+            TestData = Util.Util.DeserializeXMLToObject<InputDataModel>(xml);            
         }
         //
         // Use TestCleanup to run code after each test has run
         [TestCleanup()]
         public void MyTestCleanup()
         {
-
-        }
-        //
+            
+        }        
         #endregion
 
         [TestMethod]
-        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\EndToEnd.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential)]
+        [Description("This test add new transaction on the Budget page and then verify if the Inflow and flow are matching with the values")]
+        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\EndToEnd.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential), DeploymentItem("EndToEnd.xls")]
         public void endTwoEnd()
         {
-            PageObjectBudget budget = new PageObjectBudget(Browser, TestData, TestResult);
+            Budget = new PageObjectBudget(Browser, TestData, TestResult);
             PageObjectReport report = new PageObjectReport(Browser, TestData, TestResult);
-            budget.AddTransaction();
+            Budget.AddTransaction();
             report.NavigateToReport();
-
-            report.NavigateToSpendingByCategory();
-
-
+            bool actualResult = report.VerifyInflowChart();
+            Budget.NavigageToBudget();
+            Assert.IsTrue(actualResult, "Total InFlow value that is located in Budget page is not matching with the value InFlow located in Report page");
+            
         }
 
         [TestMethod]
-        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\AddBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential)]
+        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\AddBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential), DeploymentItem("AddBudgetTransaction.xls")]
         public void AddBudgetTransaction()
         {
             PageObjectBudget budget = new PageObjectBudget(Browser, TestData, TestResult);
@@ -106,7 +109,7 @@ namespace ModusInc.TestClass
         }
 
         [TestMethod]
-        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\DeleteExistingBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential)]
+        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\DeleteExistingBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential), DeploymentItem("DeleteExistingBudgetTransaction.xls")]
         public void DeleteExistingBudgetTransaction()
         {
             PageObjectBudget budget = new PageObjectBudget(Browser, TestData, TestResult);
@@ -115,12 +118,13 @@ namespace ModusInc.TestClass
         }
 
         [TestMethod]
-        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\UpdateExistingBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential)]
+        [DataSource("System.Data.Odbc", "Dsn=Excel Files;Driver={Microsoft Excel Driver (*.xls)};dbq=|DataDirectory|InputData\\UpdateExistingBudgetTransaction.xls;defaultdir=.;driverid=790;maxbuffersize=2048;pagetimeout=5;readonly=true", "data$", DataAccessMethod.Sequential), DeploymentItem("UpdateExistingBudgetTransaction.xls")]
         public void UpdateExistingBudgetTransaction()
         {
             PageObjectBudget budget = new PageObjectBudget(Browser, TestData, TestResult);
             budget.SearchForExistingTransactionByCategory();
             budget.UpdateTransaction();
+
         }
     }
 }

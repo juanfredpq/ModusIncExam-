@@ -65,14 +65,29 @@ namespace ModusInc.PageObject
         [FindsBy(How = How.CssSelector, Using = "section table tbody tr td div")]
         public IList<IWebElement> ExistingBudgetTransactions { get; set; }
 
+        /// <summary>
+        /// It is a field that displays the current Total Inflow in Budget page
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "div[id='root'] main section div div div:nth-child(1) div div")]
         public IWebElement TotalInflow { get; set; }
 
+        /// <summary>
+        /// It is a field that displays the current Total OutFlow in Budget page
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "div[id='root'] main section div div div:nth-child(3) div div")]
         public IWebElement TotalOutflow { get; set; }
 
+        /// <summary>
+        /// It is a field that displays the current Working Balance in Budget page
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "div[id='root'] main section div div div:nth-child(5) div div")]
         public IWebElement WorkingBalance { get; set; }
+
+        /// <summary>
+        /// It is the field that allow us to navigate to Budget page
+        /// </summary>
+        [FindsBy(How = How.CssSelector, Using = "main div a[href*='budget']")]
+        public IWebElement BudgetTab { get; set; }
 
         public PageObjectBudget(IWebDriver driver, InputDataModel inputData, TestResult testResult)
         {
@@ -80,11 +95,12 @@ namespace ModusInc.PageObject
             this.InputData = inputData;
             this.TestResult = testResult;
             this.Browser = driver;
+            InputData.composeBudget = new BudgetModel();
         }
 
-        public void VerifyBudgetScreen()
+        public void NavigageToBudget()
         {
-            //double current
+            BudgetTab.Click();
         }
 
         public void AddTransaction()
@@ -96,6 +112,10 @@ namespace ModusInc.PageObject
                 Description.SendKeys(InputData.Description);
                 Value.SendKeys(InputData.Amount);
                 Add.Click();
+                
+                InputData.composeBudget.TotalInflow = double.Parse(TotalInflow.Text.Replace("$", ""));
+                InputData.composeBudget.TotalOutflow = double.Parse(TotalOutflow.Text.Replace("$", ""));
+                InputData.composeBudget.WorkingBalance = double.Parse(WorkingBalance.Text.Replace("$", ""));
             }
             catch (Exception e)
             {
@@ -119,7 +139,7 @@ namespace ModusInc.PageObject
             SelectElement select = new SelectElement(Category);
             select.SelectByText(InputData.Category);
             Category.SendKeys(Keys.Tab);
-            Description.SendKeys(InputData.Description);            
+            Description.SendKeys(InputData.Description);
             Description.SendKeys(Keys.Tab);
             Value.SendKeys(InputData.Amount);
             Update.Click();

@@ -13,7 +13,8 @@ namespace ModusInc.Model
         public string Category { get; set; }
         public string Description { get; set; }
         public string Amount { get; set; }
-        BudgetModel composeBudget { get; set; }
+        public BudgetModel composeBudget { get; set; }
+        public double Difference { get; set; }
         public InputDataModel() { }
     }
 }

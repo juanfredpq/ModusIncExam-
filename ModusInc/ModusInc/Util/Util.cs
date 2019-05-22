@@ -64,14 +64,12 @@ namespace ModusInc.Util
 
         public static IWebDriver Login()
         {
-            IWebDriver browser = new ChromeDriver();
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("--start-maximized");            
+            IWebDriver browser = new ChromeDriver(chromeOptions);
             browser.Navigate().GoToUrl("https://budget.modus.app/budget");
             return browser;
         }
-
-        public static void GenerateReport() {
-            //TODO - TRX research again about this report generation
-        }
-
+        
     }
 }

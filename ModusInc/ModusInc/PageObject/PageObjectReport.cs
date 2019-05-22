@@ -3,7 +3,6 @@ using ModusInc.Model;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.PageObjects;
 using OpenQA.Selenium.Support.UI;
-//using SeleniumExtras.PageObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,20 +17,34 @@ namespace ModusInc.PageObject
         public IWebDriver Browser { get; set; }
         public TestResult TestResult { get; set; }
 
+        /// <summary>
+        /// It is field that allow us to access Report page
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "main div a[href*='reports']")]
         public IWebElement ReportTab { get; set; }
 
+        /// <summary>
+        /// It is a field that allow us to navigate to Inflow Vs OutFlow section
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "main div a[href*='/reports/inflow-outflow']")]
         public IWebElement InflowVsOutFlow { get; set; }
 
+        /// <summary>
+        /// It is a field that allow us to navigate to Spending by Category section
+        /// </summary>
         [FindsBy(How = How.CssSelector, Using = "main div a[href*='/reports/spending']")]
         public IWebElement SpendingByCategory { get; set; }
 
-
-        [FindsBy(How = How.CssSelector, Using = "main section div svg g g g:nth-child(1) text")]
+        /// <summary>
+        /// It is field that displays the current value of InFlow in Report page
+        /// </summary>
+        [FindsBy(How = How.CssSelector, Using = "main section div svg g g g:nth-child(1) text+text")]
         public IWebElement Inflow { get; set; }
 
-        [FindsBy(How = How.CssSelector, Using = "main section div svg g g g:nth-child(2) text")]
+        /// <summary>
+        /// It is field that displays the current value of OutFlow in Report page
+        /// </summary>
+        [FindsBy(How = How.CssSelector, Using = "main section div svg g g g:nth-child(2) text+text")]
         public IWebElement Outflow { get; set; }
 
         public PageObjectReport(IWebDriver driver, InputDataModel inputData, TestResult testResult)
@@ -42,12 +55,12 @@ namespace ModusInc.PageObject
             this.TestResult = testResult;
         }
 
-        public void VerifyInflowChart()
+        public bool VerifyInflowChart()
         {
             NavigateToReport();
-            double CurrentInflowValue = double.Parse(Inflow.Text);
-           // Assert.AreEqual(CurrentInflowValue, double.Parse())
-
+            double p = double.Parse(Inflow.Text.Replace("$", "")) + InputDataModel.Difference;
+            bool result = InputDataModel.composeBudget.TotalInflow.Equals(double.Parse(Inflow.Text.Replace("$",""))+ InputDataModel.Difference);            
+            return result;
         }
 
         public void NavigateToReport()
@@ -64,9 +77,6 @@ namespace ModusInc.PageObject
         {
             SpendingByCategory.Click();
         }
-
-
-
-
+        
     }
 }
